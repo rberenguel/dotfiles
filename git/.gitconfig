@@ -2,31 +2,31 @@
 	l5 = log --oneline -n 5
 	l10 = log --oneline -n 10
 	lon = log --oneline -n
-  s = stash
-  sp = stash pop
-  co = checkout
-  ci = commit
-  rb = rebase
-  st = status
+	s = stash
+	sp = stash pop
+	co = checkout
+	ci = commit
+	rb = rebase
+	st = status
 	c = commit -m
 	dms = diff master --summary
 	b = branch
-  di = diff
-  dc = diff --cached
+	di = diff
+	dc = diff --cached
 	nuke = "!git reset --hard; git clean -fd"
 	morning = "!git co master; git pull; git co develop; git pull"
 	dis = "!git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -d"
 	diss = "!git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D"
-  megalog = "!git log --since=\"$SINCE:last month\" --author=\"`git config user.name`\" --pretty=oneline --name-status --format="%x0a%ad" --date=format:%Y%m%d@%H:%M | awk '/^$/ { dateline=!dateline; next } dateline { date=$0; next } /[a-z]/ && !seen[$0]++ { print date,$0}'"
+	megalog = "!git log --since=\"$SINCE:last month\" --author=\"`git config user.name`\" --pretty=oneline --name-status --format="%x0a%ad" --date=format:%Y%m%d@%H:%M | awk '/^$/ { dateline=!dateline; next } dateline { date=$0; next } /[a-z]/ && !seen[$0]++ { print date,$0}'"
 	megamegalog = "!git log --since=\"$SINCE:last month\" --author=\"`git config user.name`\" --pretty=oneline --name-status --format="%x0a%ad" --date=format:%Y%m%d@%H:%M | awk '/^$/ { dateline=!dateline; next } dateline { date=$0; next } /[a-z]/ { print date,$0}'"
 	hotspots = "!git log --format=format: --name-only | egrep -v '^$' | sort | uniq -c | sort -rg | head -10"
 	hs = "!git code-changes"
-  p = pull
-  ps = push
-  plre = pull --rebase
-  out = log origin..HEAD
-  lol = log --pretty=oneline --abbrev-commit --graph --decorate
-  unstage = reset HEAD
-  undocommit = git reset --soft @^
-  diff = difftool
+	p = pull
+	ps = push
+	plre = pull --rebase
+	out = log origin..HEAD
+	lol = log --pretty=oneline --abbrev-commit --graph --decorate
+	unstage = reset HEAD
+	undocommit = git reset --soft @^
+	diff = difftool
 	alias = !git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\>\\ /
