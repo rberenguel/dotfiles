@@ -20,7 +20,7 @@
 	megalog = "!git log --since=\"$SINCE:last month\" --author=\"`git config user.name`\" --pretty=oneline --name-status --format="%x0a%ad" --date=format:%Y%m%d@%H:%M | awk '/^$/ { dateline=!dateline; next } dateline { date=$0; next } /[a-z]/ && !seen[$0]++ { print date,$0}'"
 	megamegalog = "!git log --since=\"$SINCE:last month\" --author=\"`git config user.name`\" --pretty=oneline --name-status --format="%x0a%ad" --date=format:%Y%m%d@%H:%M | awk '/^$/ { dateline=!dateline; next } dateline { date=$0; next } /[a-z]/ { print date,$0}'"
 	hotspots = "!git log --format=format: --name-only | egrep -v '^$' | sort | uniq -c | sort -rg | head -10"
-	hs = "!git code-changes"
+	hs = "!git hotspots"
 	p = pull
 	ps = push
 	plre = pull --rebase
