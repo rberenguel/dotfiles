@@ -1,6 +1,6 @@
 [core]
 	pager = delta --dark --theme='OneHalfDark' --24-bit-color --file-color="#fdf6e3" --hunk-color="#cb4b16"
-
+        # Add mouse scrolling with export BAT_PAGER="less -R" to .zshenv
 [alias]
 	l5 = log --oneline -n 5
 	l10 = log --oneline -n 10
