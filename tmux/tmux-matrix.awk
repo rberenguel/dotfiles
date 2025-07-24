@@ -15,6 +15,8 @@ BEGIN {
     close("tput cols")
     close("tput lines")
 
+    height = height - 1
+
     # Define a range of green shades (256-color codes) for the trail
     green_shades = "22 28 34 40 46"
     num_shades = split(green_shades, green_array, " ")
