@@ -37,6 +37,10 @@ The status bar is styled with a Dracula-ish theme and provides the following inf
     - Open the corresponding GitHub repository in the browser.
 - `prefix + g`: A shortcut to directly open the project's GitHub page.
 
+### "Screensavers"
+
+Why not.
+
 ### Alternate text insertion table
 
 The binding `prefix + Ctrl+t` switches to an alternate key table, for "fake typing". Currently has the following:
@@ -52,5 +56,6 @@ The configuration is enhanced by a few small, standalone `awk` scripts:
 - **`tmux-notify.awk`**: Displays a formatted success (`✓`) or failure (`✗`) message in the status bar. This can be hooked into long-running commands to provide a clear in other panes/windows.
 - **`tmux-open-gh.awk`**: A robust script that opens the GitHub page for any given repository path. It correctly parses SSH and HTTPS URLs.
 - **`tmux-slow-type.awk`**: A script to simulate human typing. It introduces variable delays and a configurable mistake rate to look more natural.
+- **`tmux-mondrian/starfield/pond/matrix`**: "Screensavers" created by Gemini. May or may not work in your setup. The matrix one is very good.
 
 These live on my home folder as symlinks pointing to this repo.
