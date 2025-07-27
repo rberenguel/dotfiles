@@ -16,6 +16,10 @@ This setup provides several quality-of-life improvements without external plugin
 - **Auto-naming**: Windows are automatically renamed to the name of the git repository they are in, but can be renamed manually.
 - **Path Awareness**: New panes and windows open in the current working directory.
 
+#### UHM
+
+See the `tmux/uhm` folder for details on the _Universal Hint Manager_.
+
 ### Status Bar
 
 The status bar is styled with a Dracula-ish theme and provides the following information:

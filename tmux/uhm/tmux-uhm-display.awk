@@ -1,7 +1,10 @@
-#!/usr/bin/awk -f
+#!/usr/bin/env gawk -f
 
 # SCRIPT 2: DISPLAYER & INTERACTOR
 # Reads annotated files, renders final output, and uses getkey() for interaction.
+
+@include "colorify.awk"
+@include "rules.awk"
 
 BEGIN {
     # --- Configuration ---
@@ -30,8 +33,11 @@ BEGIN {
         for (key in matches) {
             path = matches[key]
             label_display = LABEL_COLOR "[" key "]" RESET " "
-            match_display = HIGHLIGHT path RESET DULL
-            gsub("%%LABEL_" key "%%", label_display match_display, content_line)
+            for(i=1; i<=_regex_count; i++){
+                _color = RULE_COLORS[i]
+                match_display = colorize(path, _color) DULL
+                gsub("%%LABEL_" key "_" i "_%%", label_display match_display, content_line)
+            }
         }
         print DULL content_line RESET
     }
@@ -46,7 +52,10 @@ BEGIN {
         if (key_pressed in matches) {
             path = matches[key_pressed]
             gsub(/'/, "'\\''", path) # Escape single quotes for safety.
-            system(sprintf("tmux display-message -d 0 '%s which is key %s'", path, key_pressed))
+            # system(sprintf("tmux display-message -d 0 '%s which is key %s'", path, key_pressed))
+            # TODO: figure out how to get this to work elsewhere
+            system(sprintf("tmux set-buffer '%s' && tmux save-buffer - | pbcopy", path))
+            system(sprintf("tmux display-message -d 1000 'Copied %s'", path))
         }
     }
 }
