@@ -49,9 +49,11 @@ This provides a fast, keyboard-driven way to grab important text without leaving
     ```tmux
     # In ~/.tmux.conf
     # Pressing Prefix + u will run the script.
-    bind-key u run-shell "~/.config/tmux/uhm/tmux-uhm-process.awk"
+    bind-key u run-shell "env AWKPATH=~/.config/tmux/uhm/ UHMPATH=~/.config/tmux/uhm/ ~/.config/tmux/uhm/tmux-uhm-process.awk"
     ```
     Reload your `tmux` configuration for the binding to take effect (`tmux source-file ~/.tmux.conf`).
+
+We need to provide it with `AWKPATH` for the includes and `UHMPATH` for the call from process to display. I may merge both scripts to avoid this extra env.
 
 ## Configuration
 
