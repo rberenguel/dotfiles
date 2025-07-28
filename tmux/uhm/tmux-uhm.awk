@@ -75,9 +75,10 @@ BEGIN {
         "tmux display-message -p '#{pane_height}'" | getline pane_h; close("tmux display-message -p '#{pane_height}'")
         "tmux display-message -p '#{pane_left}'"   | getline pane_l; close("tmux display-message -p '#{pane_left}'")
         "tmux display-message -p '#{pane_top}'"    | getline pane_t; close("tmux display-message -p '#{pane_top}'")
+        _path = ARGV[2]
         _rules = ARGV[1]
         _gawk = ARGV[0]
-        cmd = "tmux popup -B -E -w " pane_w " -h " pane_h " -x " pane_l " -y " pane_t " -- " _gawk " -f " _rules " -f" cwd "/" INTERACTOR " -v mode=display"
+        cmd = "tmux popup -B -E -w " pane_w " -h " pane_h " -x " pane_l " -y " pane_t " -- " _gawk " -f " _rules " -f" cwd "/" INTERACTOR " -v mode=display -v pane_path=" _path
         system(cmd)
         
     }
@@ -111,7 +112,10 @@ BEGIN {
                 for(i=1; i<=_regex_count; i++){
                     _color = RULE_COLORS[i]
                     match_display = colorize(path, _color) DULL
-                    gsub("%%LABEL_" key "_" i "_%%", label_display match_display, content_line)
+                    sub_count = gsub("%%LABEL_" key "_" i "_%%", label_display match_display, content_line)
+                    if(sub_count > 0){
+                        keys_to_indices[key] = i
+                    }
                 }
             }
             print DULL content_line RESET
@@ -127,10 +131,27 @@ BEGIN {
             if (key_pressed in matches) {
                 path = matches[key_pressed]
                 gsub(/'/, "'\\''", path) # Escape single quotes for safety.
-                # system(sprintf("tmux display-message -d 0 '%s which is key %s'", path, key_pressed))
-                # TODO: figure out how to get this to work elsewhere
-                system(sprintf("tmux set-buffer -w '%s' && tmux save-buffer - | pbcopy", path))
-                system(sprintf("tmux display-message -d 1000 'Copied %s'", path))
+                id = keys_to_indices[key_pressed]
+                if (substr(ACTIONS[id], 1, 4) == "copy") {
+                    tmpl = substr(ACTIONS[id], 6, 999)
+                    gsub("PLACEHOLDER", path, tmpl)
+                    system(sprintf("tmux set-buffer -w '%s' && tmux save-buffer - | pbcopy", tmpl))
+                    system(sprintf("tmux display-message -d 1000 'Copied %s'", tmpl))
+                }
+                if (substr(ACTIONS[id], 1, 4) == "exec") {
+                    cmd = substr(ACTIONS[id], 6, 999)
+                    gsub("PLACEHOLDER", path, cmd)
+                    system(cmd)
+                    system(sprintf("tmux display-message -d 1000 'Executed %s'", cmd))
+                }
+                if (substr(ACTIONS[id], 1, 4) == "exco") {
+                    cmd = substr(ACTIONS[id], 6, 999)
+                    gsub("PANE_PATH", pane_path, cmd)
+                    gsub("PLACEHOLDER", path, cmd)
+                    cmd  | getline execution; close(cmd)
+                    system(sprintf("tmux set-buffer -w '%s' && tmux save-buffer - | pbcopy", execution))
+                    system(sprintf("tmux display-message -d 1000 'Copied %s'", execution))
+                }
             }
         }
     }
