@@ -2,6 +2,7 @@
 
 BEGIN {
     CAPTURE_FILE  = "/tmp/tmux-capture.dump"
+    CAPTURE_FILE_  = "/tmp/tmux-capture_.dump"
     CONTENT_FILE  = "/tmp/tmux-annotated-content.dump"
     MATCH_FILE    = "/tmp/tmux-matches.tmp"
     L_DELIM = "⠐"
@@ -22,7 +23,9 @@ BEGIN {
         "tmux display-message -p '#{scroll_position}'"  | getline scroll_p; close("tmux display-message -p '#{scroll_position}'")
         "tmux display-message -p '#{=#{scroll_position}+#{pane_height}-1}'"  | getline scroll_pe; close("tmux display-message -p '#{=#{scroll_position}+#{pane_height}-1}'")
         capture_cmd = "tmux capture-pane -p -S 0 -E " scroll_pe
-        system(capture_cmd " > " CAPTURE_FILE)
+        system(capture_cmd " > " CAPTURE_FILE_)
+        clean_last_empty_cmd = "awk '{if (p) print p; p=$0} END {if (p !~ /^\\s*$/) print p}' " CAPTURE_FILE_ " > " CAPTURE_FILE
+        system(clean_last_empty_cmd)
 
         # --- Step 2: Process the capture file ---
         # Create the two output files: one for key:path mappings, one for annotated content.
@@ -60,7 +63,7 @@ BEGIN {
             print processed_line >> CONTENT_FILE
         }
         # Clean up.
-        close(CAPTURE_FILE); system("rm " CAPTURE_FILE)
+        close(CAPTURE_FILE); #system("rm " CAPTURE_FILE)
         close(MATCH_FILE)
         close(CONTENT_FILE)
 
@@ -80,7 +83,6 @@ BEGIN {
     }
 
     if(mode=="display"){
-        print _regex_count
         COLORS[""] = ""
         preload_colors()
         # Reads annotated files, renders final output, and uses getkey() for interaction.
@@ -144,8 +146,7 @@ function colorize(message, color_name, _code) {
 
 function getkey(prompt,   # Local variables
                 key, cmd) {
-    printf "%s", prompt
-
+    #printf "%s", prompt
     # Set terminal, read char, restore terminal
     system("stty raw -echo")
     cmd = "dd if=/dev/tty bs=1 count=1 2>/dev/null"
@@ -153,7 +154,7 @@ function getkey(prompt,   # Local variables
     close(cmd)
     system("stty -raw echo")
 
-    printf "\n" # Move to a new line after input
+    #printf "\n" # Move to a new line after input
     return key
 }
 
