@@ -34,26 +34,28 @@ This provides a fast, keyboard-driven way to grab important text without leaving
 
 1.  **Dependencies:** Ensure you have `tmux` and `gawk` (GNU Awk) installed.
 
-2.  **File Structure:** Place the script files in a dedicated directory. A good location is `~/.config/tmux/uhm/`.
+2.  **File Structure:** Place the script files in a dedicated directory. A good location is `~/.config/tmux/uhm/`. You can place your rules anywhere though.
 
     ```
     ~/.config/tmux/uhm/
-    ├── tmux-uhm-process.awk
-    ├── tmux-uhm-display.awk
-    ├── rules.awk
-    └── colorify.awk
+    ├── tmux-uhm.awk
+    └── rules.awk
     ```
 
 3.  **Tmux Binding:** Add a key binding to your `~/.tmux.conf` file to launch the script.
 
     ```tmux
     # In ~/.tmux.conf
+    # This sets up copying even in remote hosts
+    set -s set-clipboard on
+    set -as terminal-features ',rxvt-unicode-256color:clipboard'
     # Pressing Prefix + u will run the script.
-    bind-key u run-shell "env AWKPATH=~/.config/tmux/uhm/ UHMPATH=~/.config/tmux/uhm/ ~/.config/tmux/uhm/tmux-uhm-process.awk"
+    bind-key u run-shell "env UHMPATH=/Users/ruben/code/dotfiles/tmux/uhm /opt/homebrew/bin/gawk -f /Users/ruben/code/dotfiles/tmux/uhm/rules.awk -f /Users/ruben/code/dotfiles/tmux/uhm/tmux-uhm.awk -v mode=parse -- /Users/ruben/code/dotfiles/tmux/uhm/rules.awk"
     ```
     Reload your `tmux` configuration for the binding to take effect (`tmux source-file ~/.tmux.conf`).
 
-We need to provide it with `AWKPATH` for the includes and `UHMPATH` for the call from process to display. I may merge both scripts to avoid this extra env.
+We provide it with a path to where the script lives in `UHMPATH` (_doompety doo_), the full `gawk` binary path (it will be used by the script) and 
+pass the rules twice. The script calls itself, and needs the rules to import on the second call.
 
 ## Configuration
 
