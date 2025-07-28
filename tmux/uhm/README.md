@@ -27,7 +27,7 @@ This provides a fast, keyboard-driven way to grab important text without leaving
 * Finds regex matches in the visible `tmux` pane.
 * Configurable via a simple `rules.awk` file.
 * Interactive popup for selecting matches.
-* Copies the selected match to the system clipboard.
+* Copies the selected match to the system clipboard, executes a command, or copies the output of a command.
 * Works correctly with split panes, creating a properly sized overlay.
 
 ## Installation & Setup
@@ -50,7 +50,7 @@ This provides a fast, keyboard-driven way to grab important text without leaving
     set -s set-clipboard on
     set -as terminal-features ',rxvt-unicode-256color:clipboard'
     # Pressing Prefix + u will run the script.
-    bind-key u run-shell "env UHMPATH=/Users/ruben/code/dotfiles/tmux/uhm /opt/homebrew/bin/gawk -f /Users/ruben/code/dotfiles/tmux/uhm/rules.awk -f /Users/ruben/code/dotfiles/tmux/uhm/tmux-uhm.awk -v mode=parse -- /Users/ruben/code/dotfiles/tmux/uhm/rules.awk"
+    bind-key u run-shell "env UHMPATH=/Users/ruben/code/dotfiles/tmux/uhm gawk -f /Users/ruben/code/dotfiles/tmux/uhm/rules.awk -f /Users/ruben/code/dotfiles/tmux/uhm/tmux-uhm.awk -v mode=parse -- /Users/ruben/code/dotfiles/tmux/uhm/rules.awk #{pane_current_path}"
     ```
     Reload your `tmux` configuration for the binding to take effect (`tmux source-file ~/.tmux.conf`).
 
@@ -59,9 +59,15 @@ pass the rules twice. The script calls itself, and needs the rules to import on 
 
 ## Configuration
 
-All configuration is done in the `rules.awk` file. You define a "triplet" of arrays for each rule you want to add.
+All configuration is done in the `rules.awk` file. You define a "quadruplet" of arrays for each rule you want to add: `REGEXES`, `CONTEXTS`, `RULE_COLORS`, and `ACTIONS`.
 
-Context is not used for now, but the idea is that it will be used as a hint to know what to highlight and what not.
+*   `REGEXES`: The regular expression to match.
+*   `CONTEXTS`: (Optional) A context string for future use.
+*   `RULE_COLORS`: The color to highlight the match in the popup.
+*   `ACTIONS`: The action to perform when a match is selected. This can be one of three types:
+    *   `copy <template>`: Copies the `<template>` to the clipboard. `PLACEHOLDER` in the template will be replaced by the matched text.
+    *   `exec <command>`: Executes the `<command>`. `PLACEHOLDER` in the command will be replaced by the matched text.
+    *   `exco <command>`: Executes the `<command>`, captures its output, and copies the output to the clipboard. `PLACEHOLDER` in the command will be replaced by the matched text. `PANE_PATH` will be replaced by the current pane's path.
 
 ```awk
 # ~/.config/tmux/uhm/rules.awk
@@ -74,14 +80,16 @@ BEGIN {
     # Rule 1: Git full hash
     _regex_count++
     REGEXES[_regex_count]     = "[a-f0-9]{40}"
-    CONTEXTS[_regex_count]    = "Git Commit"  # Optional context for future use
+    CONTEXTS[_regex_count]    = ""
     RULE_COLORS[_regex_count] = "highlight_orange"
+    ACTIONS[_regex_count] = "exco open https://github.com/$(cd PANE_PATH; gh repo view --json nameWithOwner -q .nameWithOwner | /bin/cat)/commit/PLACEHOLDER"
 
     # Rule 2: Paths in your code folder
     _regex_count++
     REGEXES[_regex_count]     = "/Users/ruben/code/[a-zA-Z0-9_./-]+"
-    CONTEXTS[_regex_count]    = "Local Path"
+    CONTEXTS[_regex_count]    = ""
     RULE_COLORS[_regex_count] = "highlight_cyan"
+    ACTIONS[_regex_count] = "exec open PLACEHOLDER"
 
     # Add more rules here...
 }
