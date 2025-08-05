@@ -10,6 +10,8 @@ This repository is a collection of custom `AWK` and `Python` scripts designed to
 
 This Python script provides a powerful, context-aware menu system for `tmux`. It works by first looking for a `.tmux-actions.md` file in the current pane's directory. If a file isn't found there, it searches for one in the root of the current Git repository (if any). This allows for a single, project-wide actions file. The script uses this file to build a pop-up menu of commands. A special `## [...] … github …` entry with no code block will automatically create an action to open the repository's GitHub page. If no configuration file is found in either location, it presents a default menu.
 
+[Here you can see a example configuration "live"](https://github.com/rberenguel/obsidian-escoli-plugin/blob/main/.tmux-actions.md).
+
 ---
 
 ### Aesthetic Animations
