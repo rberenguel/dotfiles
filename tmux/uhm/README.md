@@ -1,95 +1,47 @@
-# Tmux Universal Hint Manager (UHM)
+# My Tmux Scripts
 
-A `tmux` utility for finding and copying based on regex matches in any pane.
-
-![](https://raw.githubusercontent.com/rberenguel/dotfiles/refs/heads/main/tmux/uhm/uhm.png)
+This repository is a collection of custom `AWK` and `Python` scripts designed to enhance the `tmux` terminal multiplexer experience. They range from a dynamic menu system to aesthetic animations and command-line utilities.
 
 ---
 
-> [!NOTE]
-> I used "uhm" as placeholder name (uuuhmm I have no idea yet), and Gemini made up this
-> name when I asked for notes and description. It's actually pretty good as a name, so I'll keep it.
+## Scripts
 
-Inspired by https://github.com/morantron/tmux-fingers (which is actually a polished thing and not
-a 60 minutes hack with an LLM).
+### `tmux-actions.py`
 
-> [!WARNING]
-> Gemini is not great with awk.
+This Python script provides a powerful, context-aware menu system for `tmux`. It works by first looking for a `.tmux-actions.md` file in the current pane's directory. If a file isn't found there, it searches for one in the root of the current Git repository (if any). This allows for a single, project-wide actions file. The script uses this file to build a pop-up menu of commands. A special `## [...] … github …` entry with no code block will automatically create an action to open the repository's GitHub page. Additionally, commands defined in a blockquote (`> command`) instead of a code block will be typed into the terminal without being executed, allowing you to edit or append to them. If no configuration file is found in either location, it presents a default menu.
 
-## Description
+[Here you can see a example configuration "live"](https://github.com/rberenguel/obsidian-escoli-plugin/blob/main/.tmux-actions.md).
 
-`uhm` scans the visible text in your current `tmux` pane for patterns you define (like file paths, git hashes, URLs, etc.). It then presents an interactive popup overlay, assigning a letter to each match. Pressing a letter copies the corresponding match to your system clipboard (currently only on Mac).
+---
 
-This provides a fast, keyboard-driven way to grab important text without leaving your terminal or using the mouse.
+### Aesthetic Animations
 
-## Features
+These are "screensaver" style scripts written in `AWK` that provide visual effects. They handle terminal resizing and exit gracefully on `Ctrl+C`.
 
-* Finds regex matches in the visible `tmux` pane.
-* Configurable via a simple `rules.awk` file.
-* Interactive popup for selecting matches.
-* Copies the selected match to the system clipboard, executes a command, or copies the output of a command.
-* Works correctly with split panes, creating a properly sized overlay.
+#### `tmux-starfield.awk`
 
-## Installation & Setup
+This script creates a 3D starfield effect, simulating flight through space. It initializes a set number of stars with random 3D positions and moves them closer to the viewer in a loop. The character used for the star changes based on its proximity, creating a sense of depth.
 
-1.  **Dependencies:** Ensure you have `tmux` and `gawk` (GNU Awk) installed.
+#### `tmux-matrix.awk`
 
-2.  **File Structure:** Place the script files in a dedicated directory. A good location is `~/.config/tmux/uhm/`. You can place your rules anywhere though.
+This script produces the classic "digital rain" effect inspired by *The Matrix*. It uses a space-separated list of Katakana characters for the rain and a palette of green shades for the trail. There is also a very small chance for a character to appear in red for contrast.
 
-    ```
-    ~/.config/tmux/uhm/
-    ├── tmux-uhm.awk
-    └── rules.awk
-    ```
+#### `tmux-pond.awk`
 
-3.  **Tmux Binding:** Add a key binding to your `~/.tmux.conf` file to launch the script.
+This script simulates raindrops creating concentric, expanding ripples on a digital pond. It randomly creates new ripples, each consisting of several concentric rings. The outermost ring of a ripple has a different character to represent the wave's leading edge.
 
-    ```tmux
-    # In ~/.tmux.conf
-    # This sets up copying even in remote hosts
-    set -s set-clipboard on
-    set -as terminal-features ',rxvt-unicode-256color:clipboard'
-    # Pressing Prefix + u will run the script.
-    bind-key u run-shell "env UHMPATH=/Users/ruben/code/dotfiles/tmux/uhm gawk -f /Users/ruben/code/dotfiles/tmux/uhm/rules.awk -f /Users/ruben/code/dotfiles/tmux/uhm/tmux-uhm.awk -v mode=parse -- /Users/ruben/code/dotfiles/tmux/uhm/rules.awk #{pane_current_path}"
-    ```
-    Reload your `tmux` configuration for the binding to take effect (`tmux source-file ~/.tmux.conf`).
+#### `tmux-mondrian.awk`
 
-We provide it with a path to where the script lives in `UHMPATH` (_doompety doo_), the full `gawk` binary path (it will be used by the script) and 
-pass the rules twice. The script calls itself, and needs the rules to import on the second call.
+This script generates random geometric art inspired by Piet Mondrian, creating a new "painting" every 10 seconds. It works by recursively partitioning the screen area, drawing black dividing lines between the sections. Final rectangles have a 35% chance to be filled with a primary color from a dark mode palette; otherwise, they are filled with a background grey.
 
-## Configuration
+---
 
-All configuration is done in the `rules.awk` file. You define a "quadruplet" of arrays for each rule you want to add: `REGEXES`, `CONTEXTS`, `RULE_COLORS`, and `ACTIONS`.
+### Utility Scripts
 
-*   `REGEXES`: The regular expression to match.
-*   `CONTEXTS`: (Optional) A context string for future use.
-*   `RULE_COLORS`: The color to highlight the match in the popup.
-*   `ACTIONS`: The action to perform when a match is selected. This can be one of three types:
-    *   `copy <template>`: Copies the `<template>` to the clipboard. `PLACEHOLDER` in the template will be replaced by the matched text.
-    *   `exec <command>`: Executes the `<command>`. `PLACEHOLDER` in the command will be replaced by the matched text.
-    *   `exco <command>`: Executes the `<command>`, captures its output, and copies the output to the clipboard. `PLACEHOLDER` in the command will be replaced by the matched text. `PANE_PATH` will be replaced by the current pane's path.
+#### `tmux-slow-type.awk`
 
-```awk
-# ~/.config/tmux/uhm/rules.awk
+This script simulates human-like typing directly into a `tmux` pane. It can be configured with variables for typing delay and mistake rate. When a mistake is simulated, it types a wrong character, pauses, sends a backspace, pauses again, and then sends the correct character.
 
-BEGIN {
-    _regex_count = 0
+#### `tmux-notify.awk`
 
-    # --- Your Rules ---
-
-    # Rule 1: Git full hash
-    _regex_count++
-    REGEXES[_regex_count]     = "[a-f0-9]{40}"
-    CONTEXTS[_regex_count]    = ""
-    RULE_COLORS[_regex_count] = "highlight_orange"
-    ACTIONS[_regex_count] = "exco open https://github.com/$(cd PANE_PATH; gh repo view --json nameWithOwner -q .nameWithOwner | /bin/cat)/commit/PLACEHOLDER"
-
-    # Rule 2: Paths in your code folder
-    _regex_count++
-    REGEXES[_regex_count]     = "/Users/ruben/code/[a-zA-Z0-9_./-]+"
-    CONTEXTS[_regex_count]    = ""
-    RULE_COLORS[_regex_count] = "highlight_cyan"
-    ACTIONS[_regex_count] = "exec open PLACEHOLDER"
-
-    # Add more rules here...
-}
+A utility script to display formatted success (`✓`) or failure (`✗`) notifications in the `tmux` status line. The background color, foreground color, icon, and message are determined by the exit `status` (0 for success) passed to the script. It is designed to be called after a command completes to provide visual feedback.

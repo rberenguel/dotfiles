@@ -93,32 +93,50 @@ def show_menu(current_path_str):
         i = 0
         while i < len(lines):
             line = lines[i]
-            h2_match = re.match(r"^##\s*\[`(.+?)`\]\s*(.+?)$", line)
+            # MODIFIED: Regex now treats the hotkey part as optional
+            h2_match = re.match(r"^##\s*(?:\[`(.+?)`\]\s*)?(.+?)$", line)
             if not h2_match:
                 i += 1
                 continue
 
-            key, name_placeholder = [g.strip() for g in h2_match.groups()]
+            # MODIFIED: Handle cases with or without a key
+            groups = h2_match.groups()
+            key = groups[0].strip() if groups[0] else "" 
+            name_placeholder = groups[1].strip()
+
             is_dynamic_name = name_placeholder.startswith('`') and name_placeholder.endswith('`')
             
             command = None
+            press_enter = None
+
             next_line_idx = i + 1
             while next_line_idx < len(lines) and not lines[next_line_idx].strip():
                 next_line_idx += 1
 
-            has_code_block = next_line_idx < len(lines) and lines[next_line_idx].strip().startswith("```")
-            
-            if has_code_block:
-                if "github" in lines[next_line_idx].strip():
-                    command = "github"
-                else:
-                    command_lines = []
-                    i = next_line_idx + 1
-                    while i < len(lines) and lines[i].strip() != "```":
-                        command_lines.append(lines[i])
-                        i += 1
-                    command = "\n".join(command_lines).strip()
-            elif 'github' in name_placeholder.lower():
+            if next_line_idx < len(lines):
+                command_line = lines[next_line_idx]
+                stripped_command_line = command_line.strip()
+
+                # Regex to find a command in backticks inside a blockquote
+                blockquote_match = re.match(r">\s*`([^`]+)`\s*$", stripped_command_line)
+
+                if blockquote_match:
+                    press_enter = False
+                    command = blockquote_match.group(1)
+                    i = next_line_idx
+                elif stripped_command_line.startswith("```"):
+                    press_enter = True
+                    if "github" in stripped_command_line:
+                        command = "github"
+                    else:
+                        command_lines = []
+                        i = next_line_idx + 1
+                        while i < len(lines) and lines[i].strip() != "```":
+                            command_lines.append(lines[i])
+                            i += 1
+                        command = "\n".join(command_lines).strip()
+
+            if command is None and 'github' in name_placeholder.lower():
                 command = 'github'
 
             if not command:
@@ -148,7 +166,11 @@ def show_menu(current_path_str):
                 tmux_cmd = f"run-shell -b '{cmd_str}'"
             else:
                 cmd_str = command.replace("'", "'\\''")
-                tmux_cmd = f"send-keys -t .= 'cd \"{current_path}\" && {cmd_str}' C-m"
+                base_cmd = f"send-keys -t . 'cd \"{current_path}\" && {cmd_str}'"
+                if press_enter:
+                    tmux_cmd = f"{base_cmd} C-m"
+                else:
+                    tmux_cmd = base_cmd
 
             menu_items.extend([final_name, key, tmux_cmd])
             i += 1
