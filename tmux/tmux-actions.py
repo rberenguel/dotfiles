@@ -98,42 +98,62 @@ def show_menu(current_path_str):
                 i += 1
                 continue
 
-            key, name = [g.strip() for g in h2_match.groups()]
-            command = None
+            key, name_placeholder = [g.strip() for g in h2_match.groups()]
+            is_dynamic_name = name_placeholder.startswith('`') and name_placeholder.endswith('`')
             
-            # Find start of the code block
+            command = None
             next_line_idx = i + 1
             while next_line_idx < len(lines) and not lines[next_line_idx].strip():
                 next_line_idx += 1
 
-            if next_line_idx < len(lines) and lines[next_line_idx].strip().startswith("```"):
-                command_lines = []
-                # Check for special github command
+            has_code_block = next_line_idx < len(lines) and lines[next_line_idx].strip().startswith("```")
+            
+            if has_code_block:
                 if "github" in lines[next_line_idx].strip():
-                     command = "github"
+                    command = "github"
                 else:
+                    command_lines = []
                     i = next_line_idx + 1
                     while i < len(lines) and lines[i].strip() != "```":
                         command_lines.append(lines[i])
                         i += 1
                     command = "\n".join(command_lines).strip()
+            elif 'github' in name_placeholder.lower():
+                command = 'github'
+
+            if not command:
+                i += 1
+                continue
+
+            final_name = name_placeholder
+            if is_dynamic_name and command != "github":
+                try:
+                    proc = subprocess.run(
+                        command,
+                        shell=True,
+                        cwd=current_path,
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        timeout=5
+                    )
+                    final_name = proc.stdout.strip()
+                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+                    error_message = e.stderr.strip() if hasattr(e, 'stderr') and e.stderr else str(e)
+                    final_name = f"ERR: {error_message}"
             
             tmux_cmd = ""
             if command == "github":
                 cmd_str = f"'{script_path}' --github '{current_path}'"
-                tmux_cmd = f"run-shell '{cmd_str}'"
-            elif command:
-                cmd_str = f'cd "{current_path}" && {command}'
-                tmux_cmd = f"run-shell '{cmd_str}'"
-            else: # No command block found, move to the next line
-                 i+=1
-                 continue
+                tmux_cmd = f"run-shell -b '{cmd_str}'"
+            else:
+                cmd_str = command.replace("'", "'\\''")
+                tmux_cmd = f"send-keys -t .= 'cd \"{current_path}\" && {cmd_str}' C-m"
 
-            menu_items.extend([name, key, tmux_cmd])
+            menu_items.extend([final_name, key, tmux_cmd])
             i += 1
     else:
         display_tmux_message("No actions file found.")
-
 
     if menu_items:
         menu_items.append("")

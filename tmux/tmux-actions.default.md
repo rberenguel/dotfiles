@@ -12,4 +12,10 @@ code .
 open .
 ```
 
+## [`d`] `Dynamic: Show Date`
+
+```
+date
+```
+
 ## [`g`] Open github
