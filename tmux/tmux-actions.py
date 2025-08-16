@@ -93,13 +93,18 @@ def show_menu(current_path_str):
         i = 0
         while i < len(lines):
             line = lines[i]
-            # MODIFIED: Regex now treats the hotkey part as optional
+
+            # ADDED: Check for a separator line
+            if line.strip() == '---':
+                menu_items.append("")
+                i += 1
+                continue
+
             h2_match = re.match(r"^##\s*(?:\[`(.+?)`\]\s*)?(.+?)$", line)
             if not h2_match:
                 i += 1
                 continue
 
-            # MODIFIED: Handle cases with or without a key
             groups = h2_match.groups()
             key = groups[0].strip() if groups[0] else "" 
             name_placeholder = groups[1].strip()
@@ -117,7 +122,6 @@ def show_menu(current_path_str):
                 command_line = lines[next_line_idx]
                 stripped_command_line = command_line.strip()
 
-                # Regex to find a command in backticks inside a blockquote
                 blockquote_match = re.match(r">\s*`([^`]+)`\s*$", stripped_command_line)
 
                 if blockquote_match:
@@ -172,7 +176,7 @@ def show_menu(current_path_str):
                 else:
                     tmux_cmd = base_cmd
 
-            menu_items.extend([final_name, key, tmux_cmd])
+            menu_items.extend([f"{final_name}", key, tmux_cmd])
             i += 1
     else:
         display_tmux_message("No actions file found.")
