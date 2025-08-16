@@ -106,8 +106,11 @@ def show_menu(current_path_str):
                 continue
 
             groups = h2_match.groups()
-            key = groups[0].strip() if groups[0] else "" 
+            key_raw = groups[0].strip() if groups[0] else "" 
             name_placeholder = groups[1].strip()
+
+            send_keys_mode = key_raw.startswith('!')
+            key = key_raw[1:] if send_keys_mode else key_raw
 
             is_dynamic_name = name_placeholder.startswith('`') and name_placeholder.endswith('`')
             
@@ -164,17 +167,26 @@ def show_menu(current_path_str):
                     error_message = e.stderr.strip() if hasattr(e, 'stderr') and e.stderr else str(e)
                     final_name = f"ERR: {error_message}"
             
+            if send_keys_mode:
+                final_name = f"! {final_name}"
+
             tmux_cmd = ""
             if command == "github":
                 cmd_str = f"'{script_path}' --github '{current_path}'"
                 tmux_cmd = f"run-shell -b '{cmd_str}'"
             else:
                 cmd_str = command.replace("'", "'\\''")
-                base_cmd = f"send-keys -t . 'cd \"{current_path}\" && {cmd_str}'"
+                full_command = f'cd "{current_path}" && {cmd_str}'
                 if press_enter:
-                    tmux_cmd = f"{base_cmd} C-m"
+                    if send_keys_mode:
+                        # Send keys to the current pane for execution.
+                        tmux_cmd = f"send-keys -t . '{full_command}' C-m"
+                    else:
+                        # Execute in the background for non-blocking commands.
+                        tmux_cmd = f"run-shell -b '{full_command}'"
                 else:
-                    tmux_cmd = base_cmd
+                    # Just type the command in the current pane without executing.
+                    tmux_cmd = f"send-keys -t . '{full_command}'"
 
             menu_items.extend([f"{final_name}", key, tmux_cmd])
             i += 1
