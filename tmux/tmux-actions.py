@@ -106,11 +106,14 @@ def show_menu(current_path_str):
                 continue
 
             groups = h2_match.groups()
-            key_raw = groups[0].strip() if groups[0] else "" 
+            key_raw = groups[0].strip() if groups[0] else ""
             name_placeholder = groups[1].strip()
 
             send_keys_mode = key_raw.startswith('!')
-            key = key_raw[1:] if send_keys_mode else key_raw
+            visible_output_mode = key_raw.startswith('.')
+            key = key_raw
+            if send_keys_mode or visible_output_mode:
+                key = key_raw[1:]
 
             is_dynamic_name = name_placeholder.startswith('`') and name_placeholder.endswith('`')
             
@@ -169,6 +172,8 @@ def show_menu(current_path_str):
             
             if send_keys_mode:
                 final_name = f"! {final_name}"
+            elif visible_output_mode:
+                final_name = f". {final_name}"
 
             tmux_cmd = ""
             if command == "github":
@@ -181,9 +186,12 @@ def show_menu(current_path_str):
                     if send_keys_mode:
                         # Send keys to the current pane for execution.
                         tmux_cmd = f"send-keys -t . '{full_command}' C-m"
-                    else:
-                        # Execute in the background for non-blocking commands.
+                    elif visible_output_mode:
+                        # Execute in background, show output.
                         tmux_cmd = f"run-shell -b '{full_command}'"
+                    else:
+                        # Default: Execute in background, hide output.
+                        tmux_cmd = f"run-shell -b '({full_command})  > /dev/null || true ; tmux display-message -d1000 \"Ran {final_name}\"'"
                 else:
                     # Just type the command in the current pane without executing.
                     tmux_cmd = f"send-keys -t . '{full_command}'"

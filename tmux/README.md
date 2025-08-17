@@ -12,6 +12,45 @@ This Python script provides a powerful, context-aware menu system for `tmux`. It
 
 [Here you can see a example configuration "live"](https://github.com/rberenguel/obsidian-escoli-plugin/blob/main/.tmux-actions.md).
 
+#### Action Formatting
+
+Actions are defined using Markdown H2 headers. The format is `## [<key>] <Description>`.
+
+-   **`<key>`**: A single character to trigger the action.
+-   **`<Description>`**: The text that appears in the menu.
+
+The command to be executed is placed in a fenced code block on the following lines.
+
+```markdown
+## [`c`] Open VS Code
+
+```code
+.
+```
+```
+
+#### Execution Modifiers
+
+The behavior of the command execution can be modified by adding a prefix to the key in the header:
+
+-   **No prefix (e.g., `c`)**: This is the default. The command is executed in the background, and its output is hidden (`run-shell -b -C`). This is useful for commands that don't need user interaction or visual confirmation, like opening an application.
+-   **`.` prefix (e.g., `.b`)**: The command is executed in the background, but its output is shown in a new tmux window (`run-shell -b`). This is useful for build scripts or other commands where you want to see the output.
+-   **`!` prefix (e.g., `!s`)**: The command is sent to the current tmux pane and executed as if you typed it yourself (i.e., in the foreground, using `send-keys`). This is for interactive commands or scripts that need to run in the current shell.
+
+#### Dynamic Menu Items
+
+The description can be dynamic by enclosing a command in backticks. The script will execute this command and replace the description with its standard output.
+
+```markdown
+## [`d`] `Dynamic: Show Date`
+
+```
+date
+```
+```
+
+In this example, the menu will display the current date and time. When selected, it will run `date` again. The execution modifier (`.` or `!`) applies to the command in the code block, not the command used to generate the dynamic title. For dynamic titles that are purely informational, it's common to have the associated action be the same command running silently (the default behavior).
+
 ---
 
 ### Aesthetic Animations
