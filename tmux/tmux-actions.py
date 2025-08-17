@@ -63,7 +63,8 @@ def open_github_repo(repo_path_str):
         parsed_url = re.sub(r'\.git$', '', parsed_url)
         if parsed_url:
             final_url = f"https://github.com/{parsed_url}"
-            subprocess.run(["open", final_url])
+            come_back = "&& osascript -e 'tell application \"iTerm\" to activate'"
+            subprocess.run(f"open {final_url} {come_back} || true", shell=True)
         else:
             display_tmux_message("Could not parse GitHub URL.")
     except (subprocess.CalledProcessError, FileNotFoundError):
