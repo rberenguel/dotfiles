@@ -219,6 +219,15 @@ def display_mode(rules_path, pane_path, match_filepath, content_filepath):
                     copy_cmd = f"tmux set-buffer -w -- '{output}' && tmux save-buffer - | pbcopy"
                     subprocess.run(copy_cmd, shell=True, check=True)
                     subprocess.run(f"tmux display-message -d 2000 'Copied: {output}'", shell=True)
+                elif action_type == "type":
+                    # Send the text directly to the tmux pane
+                    subprocess.run(["tmux", "send-keys", action_cmd], check=True)
+                    subprocess.run(f"tmux display-message -d 1000 'Typed: {action_cmd}'", shell=True)
+                elif action_type == "exty":
+                    # Execute command, capture output, and send to tmux pane
+                    output = subprocess.check_output(action_cmd, shell=True).decode("utf-8").strip()
+                    subprocess.run(["tmux", "send-keys", output], check=True)
+                    subprocess.run(f"tmux display-message -d 2000 'Sent: {output}'", shell=True)
             except subprocess.CalledProcessError as e:
                  subprocess.run(
                     f"tmux display-message -d 2000 'Action failed: {e}'",

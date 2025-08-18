@@ -24,4 +24,14 @@ RULES = [
         "color": "highlight_blue",
         "action": lambda text, path: ("copy", f"mailto:{text}")
     },
+    {
+        "regex": r"TEST_TYPE_ACTION",
+        "color": "highlight_orange",
+        "action": lambda text, path: ("type", "Hello from type action!")
+    },
+    {
+        "regex": r"TEST_EXTY_ACTION",
+        "color": "highlight_cyan",
+        "action": lambda text, path: ("exty", "echo 'Hello from exty action!'")
+    },
 ]
