@@ -52,8 +52,8 @@ done
 # The code is terminal-specific. Press ctrl-v and quickly
 # the arrow to display it in your terminal and adapt depending on that
 
-bindkey -M viins '^[[A' up-line-or-search
-bindkey -M viins '^[[B' down-line-or-search
+bindkey -M viins '^[[A' history-beginning-search-backward
+bindkey -M viins '^[[B' history-beginning-search-forward
 bindkey -M viins '^[[C' forward-char
 bindkey -M viins '^[[D' backward-char
 
