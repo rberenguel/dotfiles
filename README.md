@@ -1,8 +1,12 @@
 # dotfiles
 
+## zshrc
+
+I source `vim-me-up.zsh` at the end of my normal `.zshrc`. This enables vim mode (with custom cursor for insert/normal mode) but remaps several readline keys I really need in my life.
+
 ## Git
 
-I specially love `nuke`
+I specially love `nuke`.
 
 ## Tmux
 
