@@ -52,8 +52,13 @@ zinit light ohmyzsh/ohmyzsh
 zinit ice lucid wait'0'
 zinit light junegunn/fzf
 
+# Completion
+zinit wait lucid light-mode for atinit"zicompinit; zicdreplay" zsh-users/zsh-syntax-highlighting
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+
+
+
 zinit ice lucid wait'0'
-zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-completions
 
@@ -74,6 +79,7 @@ eval "$(starship init zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [ -f ~/vim-me-up.zsh ] && source ~/vim-me-up.zsh
 [ -f ~/secrets.zsh ] && source ~/secrets.zsh
+
 
 # -----------------------------------------------------------------------------
 # -- Cheap coloring in places
