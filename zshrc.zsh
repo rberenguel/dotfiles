@@ -10,6 +10,13 @@ COMPLETION_WAITING_DOTS="true"
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 TERM=xterm-256color
 
+HISTFILE=~/.zsh_history
+HISTSIZE=10000000
+SAVEHIST=10000000
+setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+
 # -----------------------------------------------------------------------------
 # -- Zinit stuff
 # -----------------------------------------------------------------------------

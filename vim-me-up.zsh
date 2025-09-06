@@ -65,7 +65,9 @@ bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 bindkey -M viins '^K' kill-line
 bindkey -M viins '^W' backward-kill-word
-#bindkey -M viins '^R' history-incremental-search-backward
+
+bindkey -M vicmd '^R' fzf-history-widget
+bindkey -M viins '^R' fzf-history-widget
 
 # Kill (cut) from cursor to the beginning of the line
 bindkey -M viins '^U' backward-kill-line
