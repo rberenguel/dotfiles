@@ -125,3 +125,6 @@ alias notif="~/tmux-notify.awk"
 
 
 #zprof
+
+# Added by Antigravity
+export PATH="/Users/ruben/.antigravity/antigravity/bin:$PATH"
