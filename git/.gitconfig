@@ -1,3 +1,4 @@
+# PUBLIC BELOW
 [core]
 	pager = delta --dark --theme='OneHalfDark' --true-color --file-color="#fdf6e3" --hunk-color="#cb4b16"
         # Add mouse scrolling with export BAT_PAGER="less -R" to .zshenv
@@ -33,3 +34,8 @@
 	undocommit = git reset --soft @^
 	diff = difftool
 	alias = !git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\>\\ /
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f

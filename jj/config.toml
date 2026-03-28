@@ -1,0 +1,13 @@
+# PUBLIC BELOW
+[aliases]
+bs = ["bookmark", "set"]               # convenient shorthand (mostly superseded by upload)
+bl = ["bookmark", "list"]              # convenient shorthand
+bc = ["bookmark", "create"]            # convenient shorthand
+gp = ["git", "push"]                   # convenient shorthand
+gf = ["git", "fetch", "--all-remotes"] # always fetch all remotes
+desc = ["describe", "-m"]              # skip -m, inline message is always the intent
+up = ["util", "exec", "--", "sh", "-c", "B=$(jj bookmark list --tracked -T 'name ++ \"\\n\"' | head -1) && jj bookmark set \"$B\" -r @ && jj git push --bookmark \"$B\"", "--"] # set tracked bookmark to @ and push
+upload = ["up"]                        # alias for up
+nuke = ["restore"]                     # git muscle memory
+xl = ["log"]                           # hg xl muscle memory
+colo = ["util", "exec", "--", "sh", "-c", "jj git init --colocate && jj bookmark track $1 --remote=origin", "--"] # colocate init + track remote in one step
